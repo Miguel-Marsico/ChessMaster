@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessGPT 1.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+       body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+            color: #ffffff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #chat-container {
+            width: 1500px;
+            margin: auto;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #1e1e1e;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, border-color 0.3s;
+            display: flex;
+        }
+
+        #chess-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 10px;
+            padding-top: 40px;
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .column-label {
+            width: 60px;
+            height: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .row-label {
+            width: 20px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .board-row {
+            display: flex;
+        }
+
+        .square {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+
+        .square.black {
+            background-color: #769656;
+        }
+
+        .square.white {
+            background-color: #eeeed2;
+        }
+
+        .square.selected {
+            outline: 2px solid red;
+        }
+
+        .white-piece {
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+        #chat {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-title {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #chat-title img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        #messages {
+            height: 500px;
+            border: 1px solid #333;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            width: fit-content;
+            max-width: 80%;
+        }
+
+        .bot-message {
+            background-color: #2e2e2e;
+            color: white;
+            text-align: left;
+        }
+
+        .user-message {
+            background-color: #2F2F2F;
+            color: white;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        #input-container {
+            display: flex;
+        }
+
+        #input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #2e2e2e;
+            color: #ffffff;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        #input-container button {
+            padding: 10px;
+            margin-left: 5px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #2F2F2F;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        #input-container button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        #info-text {
+            text-align: center;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        #info-text a {
+            color: white;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .light-theme #info-text a {
+            color: black;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border: 1px solid #333;
+            width: 300px;
+            text-align: center;
+            border-radius: 5px;
+            color: #ffffff;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-content .close-btn {
+            background-color: #676767;
+            color: white;
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .toggle-button {
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.5s;
+        }
+
+        .toggle-button::after {
+            content: '';
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.5s;
+        }
+
+        .toggle-button.active::after {
+            transform: translateX(30px);
+        }
+
+        .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+
+        .icon.sun {
+            left: 10px;
+        }
+
+        .icon.moon {
+            right: 10px;
+        }
+
+        .light-theme {
+            background-color: #f0f0f0;
+            color: #000000;
+        }
+
+        .light-theme #chat-container {
+            background-color: #ffffff;
+            border-color: #ccc;
+        }
+
+        .light-theme #messages {
+            border-color: #ccc;
+        }
+
+        .light-theme #input-container input {
+            background-color: #ffffff;
+            border-color: #ccc;
+            color: #000000;
+        }
+
+        .light-theme #input-container button {
+            background-color: #2F2F2F;
+            border-color: #ccc;
+        }
+
+        .light-theme .modal-content {
+            background-color: #ffffff;
+            border-color: #ccc;
+            color: black;
+        }
+
+        .light-theme #theme-toggle {
+            background-color: #ccc;
+            border-radius: 30px;
+        }
+
+        .light-theme .toggle-button {
+            background-color: #ccc;
+            border-radius: 30px;
+        }
+
+        .light-theme .toggle-button::after {
+            background-color: #fff;
+        }
+
+        .light-theme .bot-message {
+            background-color: #2e2e2e;
+            color: white;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #676767;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            background-color: #2F2F2F;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #back-button:hover {
+            background-color: #3F3F3F;
+        }
+
+        button {
+            padding: 10px;
+            margin-left: 5px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #2F2F2F;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        button img {
+            width: 20px;
+            height: 20px;
+        }
+
+    </style>
+</head>
+<body class="dark-theme">
+    <button id="back-button" onclick="goBack()"><img src="https://img.icons8.com/ios-glyphs/30/ffffff/left.png" alt="Voltar" title="voltar" style="vertical-align: middle; margin-right: 5px;"></button>
+    <div id="chat-container">
+        <div id="chess-container">
+            <div class="board-container">
+                <div id="chessboard">
+                    <div class="row">
+                        <div class="row-label"></div>
+                        <div class="board-row">
+                            <div class="column-label">A</div>
+                            <div class="column-label">B</div>
+                            <div class="column-label">C</div>
+                            <div class="column-label">D</div>
+                            <div class="column-label">E</div>
+                            <div class="column-label">F</div>
+                            <div class="column-label">G</div>
+                            <div class="column-label">H</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="chat">
+            <div id="chat-title">
+                ChessGPT
+            </div>
+            <div id="messages"></div>
+            <div id="input-container">
+                <button id="get-suggestion" onclick="requestSuggestion()" style="display: none;">Obter sugestão de jogada</button>
+                <input type="text" id="user-input" placeholder="Digite a jogada do seu oponente...">
+                <button onclick="sendMessage()">
+                    <img src="https://img.icons8.com/ios-glyphs/30/ffffff/filled-sent.png" alt="Enviar">
+                </button>
+                <button onclick="startNewGame()" title="Novo Jogo">
+                    <img src="https://img.icons8.com/ios-glyphs/30/ffffff/restart.png" alt="Novo Jogo">
+                </button>
+            </div>
+            <div id="info-text">
+                ChessGPT é um assistente virtual de xadrez criado por Miguel Marsico. <a onclick="showModal()">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div id="theme-toggle">
+        <div class="toggle-button" onclick="toggleTheme()">
+            <div class="icon sun"><i class="fas fa-sun"></i></div>
+            <div class="icon moon"><i class="fas fa-moon"></i></div>
+        </div>
+    </div>
+    <div id="pieceSelectionModal" class="modal">
+        <div class="modal-content">
+            <h3>Novo Jogo</h3>
+            <p>Com quais peças você irá jogar?</p>
+            <button class="white" onclick="selectPiece(true)">Brancas</button>
+            <button class="black" onclick="selectPiece(false)" style="color: white; background-color: black;">Pretas</button>
+        </div>
+    </div>
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <p>ChessGPT é um assistente virtual projetado para fornecer sugestões de jogadas em tempo real durante uma partida de xadrez.</p>
+            <p>O usuário interage com o assistente descrevendo a última jogada do adversário, conforme a norma UCI, e o ChessGPT analisa a situação do jogo para recomendar a melhor próxima jogada.</p>
+            <button class="close-btn" onclick="closeModal()">Fechar</button>
+        </div>
+    </div>
+    <div id="loading">
+        <div class="loader"></div>
+    </div>
+    <script>
+        let invertBoard = false;
+
+        function addMessage(message, fromBot = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', fromBot ? 'bot-message' : 'user-message');
+            messageDiv.textContent = message;
+            document.getElementById('messages').appendChild(messageDiv);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            if (!message) return;
+            addMessage(message, false);
+            userInput.value = '';
+            document.getElementById('loading').style.display = 'block';
+
+            fetch('/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ move: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.responses.forEach(response => addMessage(response, true));
+                updateBoard(data.board);
+
+                document.getElementById('get-suggestion').style.display = 'block';
+            })
+            .catch(() => addMessage('Erro ao obter resposta.', true))
+            .finally(() => document.getElementById('loading').style.display = 'none');
+        }
+        function selectPiece(playingWhite) {
+            document.getElementById('loading').style.display = 'block';
+            invertBoard = !playingWhite;
+
+            fetch('/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ playing_white: playingWhite })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!playingWhite) {
+                    addMessage('Informe a primeira jogada do seu oponente...', true);
+                }
+                data.responses.forEach(response => addMessage(response, true));
+                updateBoard(data.board);
+            })
+            .finally(() => document.getElementById('loading').style.display = 'none');
+
+            document.getElementById('pieceSelectionModal').style.display = 'none';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            document.querySelector('.toggle-button').classList.toggle('active');
+        }
+
+        function showModal() { document.getElementById('infoModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+        function goBack() { window.location.href = '/'; }
+
+        function startNewGame() {
+            document.getElementById('pieceSelectionModal').style.display = 'flex';
+            document.getElementById('messages').innerHTML = '';
+            updateBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
+        }
+
+        const pieceSymbols = {
+            'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+            'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+        };
+
+        function createBoard(fen) {
+            const board = document.getElementById('chessboard');
+            board.innerHTML = '';
+            const rows = fen.split(' ')[0].split('/');
+
+            if (invertBoard) {
+                rows.reverse();
+                rows.forEach((row, i) => {
+                    rows[i] = row.split('').reverse().join('');
+                });
+            }
+
+            const columnLabels = document.createElement('div');
+            columnLabels.classList.add('row');
+            columnLabels.innerHTML = '<div class="row-label"></div>';
+            if (invertBoard) {
+                'HGFEDCBA'.split('').forEach(label => {
+                    const colLabel = document.createElement('div');
+                    colLabel.classList.add('column-label');
+                    colLabel.innerText = label;
+                    columnLabels.appendChild(colLabel);
+                });
+            } else {
+                'ABCDEFGH'.split('').forEach(label => {
+                    const colLabel = document.createElement('div');
+                    colLabel.classList.add('column-label');
+                    colLabel.innerText = label;
+                    columnLabels.appendChild(colLabel);
+                });
+            }
+            board.appendChild(columnLabels);
+
+            rows.forEach((row, i) => {
+                let colIdx = 0;
+                const rowContainer = document.createElement('div');
+                rowContainer.classList.add('row');
+
+                const rowLabel = document.createElement('div');
+                rowLabel.classList.add('row-label');
+                rowLabel.innerText = invertBoard ? i + 1 : 8 - i;
+                rowContainer.appendChild(rowLabel);
+
+                row.split('').forEach(char => {
+                    const emptySquares = parseInt(char) || 1;
+                    for (let j = 0; j < emptySquares; j++) {
+                        const square = document.createElement('div');
+                        square.classList.add('square', (i + colIdx) % 2 === 0 ? 'white' : 'black');
+                        if (!isNaN(char)) {
+                            rowContainer.appendChild(square);
+                        } else {
+                            square.innerText = pieceSymbols[char] || '';
+                            square.style.color = char === char.toLowerCase() ? 'black' : 'white';
+                            rowContainer.appendChild(square);
+                        }
+                        colIdx++;
+                    }
+                });
+                board.appendChild(rowContainer);
+            });
+        }
+
+        function updateBoard(fen) {
+            createBoard(fen);
+        }
+
+        window.onload = function() {
+            document.getElementById('pieceSelectionModal').style.display = 'flex';
+            document.getElementById('user-input').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') sendMessage();
+            });
+            createBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
+        };
+
+        function showSuggestion(suggestedMove) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'bot-message');
+            messageDiv.innerHTML = `Sugestão de jogada: ${suggestedMove} <br>
+                <button onclick="confirmMove()">Confirmar</button>
+                <button onclick="alterMove()">Alterar</button>`;
+
+            document.getElementById('messages').appendChild(messageDiv);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+        function confirmMove() {
+            document.getElementById('loading').style.display = 'block';
+            fetch('/confirm_move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.responses.forEach(response => addMessage(response, true));
+                updateBoard(data.board);
+            })
+            .finally(() => document.getElementById('loading').style.display = 'none');
+        }
+        function alterMove() {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'bot-message');
+            messageDiv.innerHTML = `Digite sua jogada: <input type="text" id="new-move">
+                <button onclick="submitNewMove()">Enviar</button>`;
+
+            document.getElementById('messages').appendChild(messageDiv);
+        }
+
+        function submitNewMove() {
+            const newMove = document.getElementById('new-move').value.trim();
+            if (!newMove) return;
+
+            addMessage(`Jogada alterada para: ${newMove}`, false);
+            document.getElementById('loading').style.display = 'block';
+
+            fetch('/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ move: newMove })
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.responses.forEach(response => addMessage(response, true));
+                updateBoard(data.board);
+
+                if (data.suggested_move) {
+                    showSuggestion(data.suggested_move);
+                }
+            })
+            .finally(() => document.getElementById('loading').style.display = 'none');
+        }
+
+        function requestSuggestion() {
+            document.getElementById('loading').style.display = 'block';
+
+            fetch('/get_suggestion', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.suggested_move) {
+                    showSuggestion(data.suggested_move);
+                } else {
+                    addMessage("Nenhuma sugestão disponível.", true);
+                }
+            })
+            .finally(() => document.getElementById('loading').style.display = 'none');
+
+            document.getElementById('get-suggestion').style.display = 'none';
+        }
+        function changeMove() {
+            addMessage("Digite sua nova jogada:", true);
+            isWaitingForNewMove = true;
+        }
+    </script>
+</body>
+</html>

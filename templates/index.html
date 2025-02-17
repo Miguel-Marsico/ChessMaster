@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="static/Chess_26226.ico" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+            color: #ffffff;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        #main-container {
+            width: 90%;
+            max-width: 1200px;
+            text-align: center;
+        }
+        #title {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        #username {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .card-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+            flex: 1 1 calc(25% - 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .card img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .card-title {
+            font-size: 1.5em;
+            margin: 15px 0 10px;
+        }
+        .card-description {
+            font-size: 1em;
+            color: #bbbbbb;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .toggle-button {
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.5s;
+        }
+        .toggle-button::after {
+            content: '';
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.5s;
+        }
+        .toggle-button.active::after {
+            transform: translateX(30px);
+        }
+        .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+        .icon.sun {
+            left: 10px;
+        }
+        .icon.moon {
+            right: 10px;
+        }
+        .light-theme {
+            background-color: #f0f0f0;
+            color: #000000;
+        }
+        .light-theme .card {
+            background-color: #ffffff;
+        }
+        .light-theme .card-description {
+            color: #333333;
+        }
+        .auth-button {
+            background-color: #49504a;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .auth-button:hover {
+            background-color: #49504a;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #ffffff;
+            width: 300px;
+            position: relative;
+        }
+        .modal-content input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px auto;
+            border: none;
+            border-radius: 5px;
+            background-color: #333333;
+            color: #ffffff;
+            display: block;
+        }
+        .modal-content button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #49504a;
+            color: white;
+            cursor: pointer;
+        }
+        .modal-content button:hover {
+            background-color: #49504a;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #aaaaaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .switch-modal {
+            background: none;
+            color: #49504a;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            margin-top: 10px;
+            text-decoration: underline;
+            display: block;
+        }
+        .switch-modal:hover {
+            color: #49504a;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div id="main-container">
+        <div id="title">Chess Master</div>
+        {% if current_user.is_authenticated %}
+            <div id="username">Bem-vindo, {{ current_user.username }}!</div>
+        {% endif %}
+        <div class="card-container">
+            <div class="card" onclick="handleCardClick('/chessgpt')">
+                <img src="static/chessgpt.png" alt="ChessGPT">
+                <div class="card-title">ChessGPT</div>
+                <div class="card-description">Assistente virtual de xadrez que sugere as melhores jogadas em tempo real.</div>
+            </div>
+            <div class="card">
+                <img src="static/chess_work.png" alt="Versus IA">
+                <div class="card-title">Versus IA</div>
+                <div class="card-description">Treine com uma IA de alta precisão (99.9%).</div>
+            </div>
+            <div class="card">
+                <img src="static/exercicios_work.png" alt="Exercícios">
+                <div class="card-title">Exercícios</div>
+                <div class="card-description">Pratique diferentes estilos e estratégias de xadrez.</div>
+            </div>
+        </div>
+    </div>
+    <div id="controls">
+        {% if current_user.is_authenticated %}
+            <button class="auth-button" onclick="window.location.href='/logout'">Logout</button>
+        {% else %}
+            <button class="auth-button" onclick="openModal('loginModal')">Login</button>
+            <button class="auth-button" onclick="openModal('registerModal')">Registrar</button>
+        {% endif %}
+        <div id="theme-toggle" class="toggle-button" onclick="toggleTheme()">
+            <div class="icon sun"><i class="fas fa-sun"></i></div>
+            <div class="icon moon"><i class="fas fa-moon"></i></div>
+        </div>
+    </div>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm" method="POST" action="/login">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <button type="submit">Login</button>
+            </form>
+            <a class="switch-modal" onclick="switchModal('registerModal')">Registrar-se</a>
+        </div>
+    </div>
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Registro</h2>
+            <form id="registerForm" method="POST" action="/register">
+                <input type="text" name="username" placeholder="Nome de usuário" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <button type="submit">Registrar</button>
+            </form>
+            <a class="switch-modal" onclick="switchModal('loginModal')">Já tem uma conta? Faça login</a>
+        </div>
+    </div>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            document.body.classList.toggle('dark-theme');
+            const themeToggle = document.querySelector('.toggle-button');
+            themeToggle.classList.toggle('active');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function switchModal(modalId) {
+            closeModal('loginModal');
+            closeModal('registerModal');
+            openModal(modalId);
+        }
+
+        function handleCardClick(url) {
+            const isAuthenticated = {{ current_user.is_authenticated|tojson }};
+            if (isAuthenticated) {
+                window.location.href = url;
+            } else {
+                openModal('loginModal');
+            }
+        }
+    </script>
+</body>
+</html>
