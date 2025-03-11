@@ -1,5 +1,5 @@
 <h1>
-    Chess Master ♚ 
+    ChessMaster ♚ 
 </h1>
 
 ## 📋 Tópicos
@@ -17,7 +17,7 @@
 
 ## ✨ Estágio de desenvolimento
 
-O projeto é dividido em 3 funcionalidades principais: Assitente de xadres em tempo real (ChessGpt), Jogo treino contra IA e Exercícios de prática de xadrez.
+O projeto é dividido em 3 funcionalidades principais: Assitente de xadrez em tempo real (ChessGpt), Jogo treino contra IA e Exercícios de prática de xadrez.
 
 **ChessGPT**
 
@@ -27,19 +27,19 @@ Essa etapa do desenvolvimento á está concluida utilizando uma interface tempor
 
 **Jogo vs IA**
 
-...
+Modo de jogo onde o usuário pode desafiar uma IA de alto desempenho, configurando diferentes níveis de dificuldade para melhorar gradualmente suas habilidades. A IA utilizará a engine Stockfish para tomar decisões otimizadas e oferecer um desafio adequado a jogadores de todos os níveis.
 
-Essa etapa ainda não está em desenvolvimento, provalvelmente será implementada em uma nova interface mais avançada utilizando React.
+Essa etapa ainda não está em desenvolvimento, provavelmente será implementada em uma nova interface mais avançada utilizando React.
 
 **Exercícios**
 
-...
+Seção dedicada ao aperfeiçoamento do jogador, com exercícios interativos focados em táticas, combinações, finais e outras estratégias essenciais para evoluir no xadrez. O sistema oferecerá feedback automático e análises detalhadas para ajudar no aprendizado.
 
-Essa etapa está em desenvolvimento. ...
+Essa etapa está em desenvolvimento. Atualmente, estou estruturando os primeiros conjuntos de exercícios e definindo a melhor abordagem para fornecer desafios dinâmicos e personalizáveis.
 
 **Interface**
 
-Atualmente a interface utilizada é desenvolvida em HTML, CSS e JS, tudo em um único arquivo HTML para o foco no desenovlivmento de funcionalidades backend. Essa interface será substituida em breve por uma interface em React.
+Atualmente a interface utilizada é desenvolvida em HTML, CSS e JS, tudo em um único arquivo HTML para o foco no desenvolvimento de funcionalidades backend. Essa interface será substituída em breve por uma interface em React.
 
 ## 🔧 Ferramentas
 
@@ -69,7 +69,7 @@ Atualmente a interface utilizada é desenvolvida em HTML, CSS e JS, tudo em um �
 
 ### ⚙️ Backend:
 
-#### Criando um ambiente viradvetual:
+#### Criando um ambiente virtual:
 
 1 - Navegue até o diretório onde deseja criar o ambiente virtual:
 
